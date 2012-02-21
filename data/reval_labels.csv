@@ -16,9 +16,9 @@ Label1,Homestead
 Label22,Abatement
 Label2,Farmstead
 Label6,Lot_Area
-Label42,Land_Value_Mkt
-Label39,Land_Value_Reval
-Label43,Building_Value_Mkt
-Label40,Building_Value_2013
-Label44,Total_Value_Mkt
-Label41,Total_Value_2013
+Label42,Land_Value_2013_Mkt
+Label39,Land_Value_2013_Reval
+Label43,Building_Value_2013_Mkt
+Label40,Building_Value_2013_Reval
+Label44,Total_Value_2013_Mkt
+Label41,Total_Value_2013_Reval
