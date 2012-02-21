@@ -13,7 +13,6 @@
 
 
 library(ggplot2)
-library(directlabels)
 
 
 ### Load the data set
@@ -85,17 +84,14 @@ reval_effects <-
                          Total_Value_2013_Reval_Cty =
                            (Total_Value_2013_Reval +
                             (HOMESTEAD_ADJUSTMENT * (Homestead.y == "Yes")))),
-
               ## Relative assessment
               rel_asm = ((county_rate * (Total_Value_2013_Reval_Cty /
                                          Total_Value_2012_Cty) +
                           (sd_rate + muni_rate) * (Total_Value_2013_Reval /
                                                    Total_Value_2012_Mkt))
                          / (county_rate + sd_rate + muni_rate)),
-
               ## Increase in assessment
               asm_increase = rel_asm - 1.0,
-
               ## Increase in property taxes (estimated)
               ptx_increase = anti_windfall_adj_composite * rel_asm - 1.0))
 
