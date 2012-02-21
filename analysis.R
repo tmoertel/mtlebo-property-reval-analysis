@@ -55,10 +55,10 @@ county_rate <-  5.69
 muni_rate   <-  5.43
 sd_rate     <- 26.63
 
-anti_windfall_adj_composite = ((county_rate * anti_windfall_adj_county +
-                                sd_rate     * anti_windfall_adj_muni_sd +
-                                muni_rate   * anti_windfall_adj_muni_sd) /
-                               (county_rate + sd_rate + muni_rate))
+anti_windfall_adj_composite <- ((county_rate * anti_windfall_adj_county +
+                                 sd_rate     * anti_windfall_adj_muni_sd +
+                                 muni_rate   * anti_windfall_adj_muni_sd) /
+                                (county_rate + sd_rate + muni_rate))
 
 
 ## Compute assessment and property-tax increases
