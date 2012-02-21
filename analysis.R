@@ -38,7 +38,7 @@ HOMESTEAD_ADJUSTMENT <- -15000
 ## as a proxy for the county, which isn't right but not wrong enough to
 ## make our approximations unreasonable
 county_base_2012 <- sum(as.numeric(subj_2012$Total_Value_2012_Cty), na.rm = T)
-county_base_2013 <- sum(as.numeric(subj_2013$Total_Value_2013_Reval) -
+county_base_2013 <- sum(as.numeric(subj_2013$Total_Value_2013_Reval) +
                         HOMESTEAD_ADJUSTMENT * (reval$Homestead == "Yes"),
                         na.rm = T)
 
