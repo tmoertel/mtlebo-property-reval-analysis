@@ -158,7 +158,7 @@ qplot(ptx_increase, binwidth = 0.025,
 ## Method 1:  Use the full data set
 ptx_increase_cdf <- ecdf(reval_effects$ptx_increase)
 print("percentage of properties (all) that will have lower taxes:")
-ptx_increase_cdf(0)        # --> 0.52    (no change)
+ptx_increase_cdf(0)        # --> 0.52    (any decrease)
 1 - ptx_increase_cdf(0.25) # --> 0.12    (increase by more than 25%)
 ptx_increase_cdf(-0.25)    # --> 0.06    (decrase by more than 25%)
 ptx_increase_cdf(0.25) - ptx_increase_cdf(-0.25)  # --> 0.82  (|change| <= 25%)
