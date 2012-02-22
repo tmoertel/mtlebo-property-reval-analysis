@@ -49,16 +49,11 @@ muni_sd_base_2013 <- sum(as.numeric(subj_2013$Total_Value_2013_Reval), na.rm = T
 anti_windfall_adj_county  <- county_base_2012 / county_base_2013
 anti_windfall_adj_muni_sd <- muni_sd_base_2012 / muni_sd_base_2013
 
-## We can compute a composite adjustment for your total tax rate as
-## a weighted average of the county, muni, and SD
+## Tax rates for local taxing bodies.  We use these to weight the
+## contribution of each taxing body to totals.
 county_rate <-  5.69
 muni_rate   <-  5.43
 sd_rate     <- 26.63
-
-anti_windfall_adj_composite <- ((county_rate * anti_windfall_adj_county +
-                                 sd_rate     * anti_windfall_adj_muni_sd +
-                                 muni_rate   * anti_windfall_adj_muni_sd) /
-                                (county_rate + sd_rate + muni_rate))
 
 
 ## Compute assessment and property-tax increases
@@ -92,8 +87,16 @@ reval_effects <-
                          / (county_rate + sd_rate + muni_rate)),
               ## Increase in assessment
               asm_increase = rel_asm - 1.0,
+              ## Relative property taxes (estimated)
+              rel_ptx = (((county_rate * anti_windfall_adj_county *
+                           (Total_Value_2013_Reval_Cty /
+                            Total_Value_2012_Cty)) +
+                          ((sd_rate + muni_rate) * anti_windfall_adj_muni_sd *
+                           (Total_Value_2013_Reval /
+                            Total_Value_2012_Mkt)))
+                         / (county_rate + sd_rate + muni_rate)),
               ## Increase in property taxes (estimated)
-              ptx_increase = anti_windfall_adj_composite * rel_asm - 1.0))
+              ptx_increase = rel_ptx - 1))
 
 write.csv(reval_effects, file = "data/mtlebo_reval_effects.csv", row.names = F)
 
