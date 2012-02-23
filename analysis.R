@@ -167,7 +167,7 @@ ptx_increase_cdf(-0.25)    # --> 0.06    (decrase by more than 25%)
 ptx_increase_cdf(0.25) - ptx_increase_cdf(-0.25)  # --> 0.82  (|change| <= 25%)
 
 ## Method 2:  Drop properties w/ 2013 assessment < $3K
-reval_effects_3k <- subset(reval_effects, Total_Value_2013_Reval_Mkt >= 3000)
+reval_effects_3k <- subset(reval_effects, Total_Value_2013_Reval >= 3000)
 ptx_3k_increase_cdf <- ecdf(reval_effects_3k$ptx_increase)
 print("percentage of properties (>= $3K) that will have lower taxes:")
 ptx_3k_increase_cdf(0)  # --> 0.51
