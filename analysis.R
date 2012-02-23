@@ -38,7 +38,7 @@ HOMESTEAD_ADJUSTMENT <- -15000
 ## make our approximations unreasonable
 county_base_2012 <- sum(as.numeric(subj_2012$Total_Value_2012_Cty), na.rm = T)
 county_base_2013 <- sum(as.numeric(subj_2013$Total_Value_2013_Reval) +
-                        HOMESTEAD_ADJUSTMENT * (reval$Homestead == "Yes"),
+                        HOMESTEAD_ADJUSTMENT * (subj_2013$Homestead == "Yes"),
                         na.rm = T)
 
 ## Muni and school district don't use the homestead exemption
