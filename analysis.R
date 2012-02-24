@@ -171,3 +171,54 @@ reval_effects_3k <- subset(reval_effects, Total_Value_2013_Reval >= 3000)
 ptx_3k_increase_cdf <- ecdf(reval_effects_3k$ptx_increase)
 print("percentage of properties (>= $3K) that will have lower taxes:")
 ptx_3k_increase_cdf(0)  # --> 0.51
+
+
+
+### Now we look into property characteristics to see if we can discern
+### what may have caused some properties to be hit harder by the
+### reassessment
+
+## First, we load building data for base and reval assessments
+baseval_bldg <- read.csv("data/mtlebo_baseval_bldg.csv", sep = "|")  # 2012
+reval_bldg   <- read.csv("data/mtlebo_reval_bldg.csv", sep = "|")    # 2013
+
+## Standardize on calling the garage count "Garages"
+baseval_bldg <- rename(baseval_bldg, c(Garage = "Garages"))
+reval_bldg <- rename(reval_bldg, c(Basement_Garage = "Garages"))
+
+## Merge the two data sets into one and compute differences
+bldg <- merge(baseval_bldg, reval_bldg, by = "Parcel_ID",
+              suffixes = c("_Base", "_Reval"))
+
+bldg <- transform(bldg,
+                  Total_Rooms_Diff = Total_Rooms_Reval - Total_Rooms_Base,
+                  Bedrooms_Diff    = Bedrooms_Reval    - Bedrooms_Base,
+                  Full_Baths_Diff  = Full_Baths_Reval  - Full_Baths_Base,
+                  Half_Baths_Diff  = Half_Baths_Reval  - Half_Baths_Base,
+                  Fireplaces_Diff  = Fireplaces_Reval  - Fireplaces_Base,
+                  Garages_Diff     = Garages_Reval     - Garages_Base)
+
+
+
+## Add a PIN primary key
+bldg <- transform(bldg, PIN = gsub("-", "", Parcel_ID))
+
+## And merge it with reval-effects data
+bldg_effects <- merge(bldg, reval_effects, by = "PIN")
+
+## Exclude extreme assessment changes
+bldg_effects <- subset(bldg_effects, rel_asm >= 0 & rel_asm < 3)
+
+## And now a few simple models . . .
+
+options(digits = 2)
+
+m1 <- lm(rel_asm ~ (Bedrooms_Diff + Full_Baths_Diff +
+                    Half_Baths_Diff + Fireplaces_Diff + Garages_Diff +
+                    Total_Rooms_Base + Full_Baths_Base + Half_Baths_Base +
+                    Style_Base + Heating_Base + Cooling_Base +
+                    Grade_Base + Condition_Base +
+                    Total_Value_2012_Mkt),
+         data = bldg_effects)
+
+summary(m1)
