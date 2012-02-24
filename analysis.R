@@ -123,9 +123,19 @@ rounder <- function(...) function(x) round_any(x, ...)
 
 
 ## Focus on just commercial and residential properties
+property_info <- read.csv("data/mtlebo_properties.csv")
+property_info <- transform(property_info,
+                           Zip_Code = factor(PROPERTYZI),
+                           PROPERTYZI = NULL)
+
 com_res <- transform(subset(reval_effects,
                             State_Code %in% c("Commercial", "Residential")),
                      State_Code = factor(as.character(State_Code)))
+com_res <- merge(com_res, property_info)
+
+res <- transform(subset(com_res, State_Code == "Residential"),
+                 Zip_Code = reorder(Zip_Code, ptx_increase, median))
+
 
 ## Compute cumulative distribution
 com_res_cdf <- dd_ecdf(com_res, .(State_Code), .value = ptx_increase,
@@ -149,10 +159,14 @@ ggsave(p, file = "out/mtlebo-reval-property-tax-increases-ecdf.pdf",
 ## Histogram
 p <-
 qplot(ptx_increase, binwidth = 0.025,
-      data = subset(com_res, ptx_increase > -10 & ptx_increase < 2),
-      facets = State_Code ~ .) +
+      main = "Some Zip Codes had higher increases than others",
+      xlab = "Estimated property-tax increase",
+      ylab = "Count of homes having that increase",
+      data = subset(res, ptx_increase > -10 & ptx_increase < 2),
+      facets = Zip_Code ~ .) +
   scale_x_continuous(formatter = "percent", lim = c(-1, 1))
 
+p
 
 
 ### Summary statistics;
