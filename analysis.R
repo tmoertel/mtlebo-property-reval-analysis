@@ -122,19 +122,32 @@ dd_ecdf <- function(df, ..., .quantizer = identity, .value = value) {
 rounder <- function(...) function(x) round_any(x, ...)
 
 
-## Focus on just commercial and residential properties
+## Neighboorhood analysis:  focus on commercial and residential properties
 property_info <- read.csv("data/mtlebo_properties.csv")
 property_info <- transform(property_info,
                            Zip_Code = factor(PROPERTYZI),
                            PROPERTYZI = NULL)
 
+neighborhood_info <-
+  transform(bothval[, c("Parcel_ID", "Neighborhood_Code.y")],
+            PIN = gsub("-", "", Parcel_ID),
+            Parcel_ID = NULL,
+            Neighborhood = Neighborhood_Code.y,
+            Neighborhood_Code.y = NULL)
+
+property_info <- merge(property_info, neighborhood_info)
+
+
 com_res <- transform(subset(reval_effects,
                             State_Code %in% c("Commercial", "Residential")),
                      State_Code = factor(as.character(State_Code)))
 com_res <- merge(com_res, property_info)
+com_res <- subset(com_res, ptx_increase < Inf & !is.na(ptx_increase))
 
 res <- transform(subset(com_res, State_Code == "Residential"),
-                 Zip_Code = reorder(Zip_Code, ptx_increase, median))
+                 Zip_Code = reorder(Zip_Code, ptx_increase, median),
+                 Neighborhood = reorder(Neighborhood, ptx_increase, median))
+
 
 
 ## Compute cumulative distribution
@@ -158,15 +171,45 @@ ggsave(p, file = "out/mtlebo-reval-property-tax-increases-ecdf.pdf",
 
 ## Histogram
 p <-
-qplot(ptx_increase, binwidth = 0.025,
+qplot(ptx_increase, binwidth = 0.01,
       main = "Some Zip Codes had higher increases than others",
       xlab = "Estimated property-tax increase",
       ylab = "Count of homes having that increase",
       data = subset(res, ptx_increase > -10 & ptx_increase < 2),
       facets = Zip_Code ~ .) +
-  scale_x_continuous(formatter = "percent", lim = c(-1, 1))
+  scale_x_continuous(formatter = "percent", lim = c(-0.5, 0.5))
 
 p
+
+ggsave(p, file = "out/mtlebo-reval-hist-ptx-incr-by-zip.pdf",
+       height = 5, width = 7)
+
+
+p <-
+qplot(ptx_increase, binwidth = 0.025,
+      main = "Some Neighborhoods had higher increases than others",
+      xlab = "Estimated property-tax increase",
+      ylab = "Count of homes having that increase",
+      data = subset(res, ptx_increase > -10 & ptx_increase < 2)) +
+  scale_x_continuous(formatter = "percent", lim = c(-0.5, 0.5),
+                     breaks = c(-0.40, 0, 0.40)) +
+  facet_wrap(~ Neighborhood)
+
+p
+
+ggsave(p, file = "out/mtlebo-reval-hist-ptx-incr-by-hood.pdf",
+       height = 5, width = 7)
+
+
+options(digits = 2)
+
+ddply(res, .(Zip_Code), summarize, median_ptx_increase = median(ptx_increase))
+
+ddply(res, .(Neighborhood), summarize,
+      median_ptx_increase = median(ptx_increase),
+      count = length(ptx_increase))
+
+
 
 
 ### Summary statistics;
