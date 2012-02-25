@@ -270,12 +270,32 @@ bldg_effects <- subset(bldg_effects, rel_asm >= 0 & rel_asm < 3)
 
 options(digits = 2)
 
+
+## First, a linear model to predict relative assessment increase
 m1 <- lm(rel_asm ~ (Bedrooms_Diff + Full_Baths_Diff +
                     Half_Baths_Diff + Fireplaces_Diff + Garages_Diff +
                     Total_Rooms_Base + Full_Baths_Base + Half_Baths_Base +
                     Style_Base + Heating_Base + Cooling_Base +
                     Grade_Base + Condition_Base +
+                    Year_Built_Base +
+                    Use_Code_Reval + Homestead + Stories_Base +
                     Total_Value_2012_Mkt),
          data = bldg_effects)
 
 summary(m1)
+
+
+## And a multiplicative model to predict relative assessment increase
+m2 <- lm(log(Total_Value_2013_Reval) ~
+         (Bedrooms_Diff + Full_Baths_Diff +
+          Half_Baths_Diff + Fireplaces_Diff + Garages_Diff +
+          Total_Rooms_Base + Full_Baths_Base + Half_Baths_Base +
+          Style_Base + Heating_Base + Cooling_Base +
+          Grade_Base + Condition_Base +
+          Year_Built_Base +
+          Use_Code_Reval + Homestead + Stories_Base +
+          I(log(Total_Value_2012_Mkt))),
+         data = bldg_effects)
+summary(m2)
+
+as.matrix(exp(coef(m2)))
