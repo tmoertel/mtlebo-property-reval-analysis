@@ -316,14 +316,23 @@ re_sales_bldg_effects <- subset(re_sales_bldg_effects,
                                 SALEPRICE > 0 &
                                 Total_Value_2012_Mkt > 0)
 
+to_dB <- function(x) 10 * log10(x)
+
 re_comp <- with(re_sales_bldg_effects,
-                data.frame(Sold_For = SALEPRICE,
-                           Reassessed_At = Total_Value_2013_Reval))
+                data.frame(PIN = PIN,
+                           Sold_For = SALEPRICE,
+                           Reassessed_At = Total_Value_2013_Reval,
+                           Error_Intensity_dB = to_dB(
+                             Total_Value_2013_Reval / SALEPRICE)))
 
 ## Narrow comparison to properties in the $50K to $500K range
 re_comp <- subset(re_comp,
                   Sold_For      > 50000 & Sold_For      < 5e5 &
                   Reassessed_At > 50000 & Reassessed_At < 5e5)
+
+write.csv(re_comp, file = "data/mtlebo_reval_reality_check.csv", row.names = F)
+
+
 
 p <-
 qplot(Reassessed_At, Sold_For, data = re_comp,
