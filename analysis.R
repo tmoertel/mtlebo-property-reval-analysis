@@ -299,3 +299,44 @@ m2 <- lm(log(Total_Value_2013_Reval) ~
 summary(m2)
 
 as.matrix(exp(coef(m2)))
+
+
+
+### Compare assessment valuations w/ 2010-2011 residential real-estate
+### sales data to see how closely they approximate "fair market" prices
+
+## Load RE sales data set (courtesy of the Pittsburgh Neighborhood and
+## Community Information System at the University Center for Social
+## and Urban Research:  http://www.ucsur.pitt.edu/thepub.php?pl=370)
+re_sales <- read.csv("data/re_sales_2010_2011.csv", comment.char = "#")
+re_sales <- rename(re_sales, c(MAPBLOLOT = "PIN"))
+
+re_sales_bldg_effects <- merge(re_sales, bldg_effects, by = "PIN")
+re_sales_bldg_effects <- subset(re_sales_bldg_effects,
+                                SALEPRICE > 0 &
+                                Total_Value_2012_Mkt > 0)
+
+re_comp <- with(re_sales_bldg_effects,
+                data.frame(Sold_For = SALEPRICE,
+                           Reassessed_At = Total_Value_2013_Reval))
+
+## Narrow comparison to properties in the $50K to $500K range
+re_comp <- subset(re_comp,
+                  Sold_For      > 50000 & Sold_For      < 5e5 &
+                  Reassessed_At > 50000 & Reassessed_At < 5e5)
+
+p <-
+qplot(Reassessed_At, Sold_For, data = re_comp,
+      geom = c("smooth", "point"),
+      method = "lm",
+      main = "Lebo homes sold for 4% above reassessed value, on average",
+      xlab = "Reassessed value",
+      ylab = "Recent sales price (2010 or 2011)"
+      ) +
+  geom_abline(intercept = 0, slope = 1, color = "gray") +
+  scale_x_continuous(formatter = "dollar", lim = c(0, 5e5)) +
+  scale_y_continuous(formatter = "dollar", lim = c(0, 5e5))
+
+ggsave(p, file = "out/mtlebo-home-sales-vs-reval.pdf", height = 7, width = 7)
+
+summary(lm(Sold_For ~ Reassessed_At, data = re_comp))
