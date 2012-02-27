@@ -321,6 +321,7 @@ to_dB <- function(x) 10 * log10(x)
 re_comp <- with(re_sales_bldg_effects,
                 data.frame(PIN = PIN,
                            Sold_For = SALEPRICE,
+                           Was_Assessed_At = Total_Value_2012_Mkt,
                            Reassessed_At = Total_Value_2013_Reval,
                            Error_Intensity_dB = to_dB(
                              Total_Value_2013_Reval / SALEPRICE)))
@@ -349,3 +350,24 @@ qplot(Reassessed_At, Sold_For, data = re_comp,
 ggsave(p, file = "out/mtlebo-home-sales-vs-reval.pdf", height = 7, width = 7)
 
 summary(lm(Sold_For ~ Reassessed_At, data = re_comp))
+
+
+
+## For homes that were recently sold, did the reassessment move them
+## closer to their sales prices?
+p <-
+ggplot(re_comp) +
+  geom_segment(aes(x = Reassessed_At, y = Sold_For,
+                   xend = Was_Assessed_At, yend = Sold_For), color = "gray") +
+  geom_point(aes(Reassessed_At, Sold_For), color = "blue") +
+  geom_point(aes(Was_Assessed_At, Sold_For), color = "red") +
+  geom_abline(intercept = 0, slope = 8/8, color = "gray") +
+  scale_x_continuous(formatter = "dollar", lim = c(0, 5e5)) +
+  scale_y_continuous(formatter = "dollar", lim = c(0, 5e5)) +
+  xlab("Assessed property value (red = old assessment, blue = new)") +
+  ylab("Recently sold for (2010 or 2011)") +
+  opts(title = "Lebo homes moved closer to sales price under new assessment")
+
+ggsave(p, file = "out/mtlebo-home-sales-vs-reval-and-baseval-movement.pdf",
+       useDingbats = F,
+       height = 7, width = 7)
